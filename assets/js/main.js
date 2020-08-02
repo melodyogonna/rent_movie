@@ -2,18 +2,23 @@ const movies = [
   {
     name: "Captain America",
     dateMade: "17-10-2020",
+    rented: false,
   },
   {
     name: "Super Man",
     dateMade: "17-10-2020",
+    rented: false,
   },
   {
     name: "Batman - Homecoming",
     dateMade: "17-10-2020",
+    rented: false,
   },
 ];
 
-const html_table = document.querySelector(".movies-table");
+const html_table = document
+  .querySelector(".movies-table")
+  .getElementsByTagName("tbody")[0];
 const search_input = document.querySelector("#search");
 
 const movieLibrary = {
@@ -28,16 +33,22 @@ const movieLibrary = {
   //Display movies
   display_movies(movies) {
     movies.forEach((movie, index) => {
-      const html = `<tr id="${index}"><td>${movie.name}</td><td>${movie.dateMade}</td><td><button class="btn btn--rent" onclick="rent(${index})">Rent</button></td></tr>`;
-      html_table.getElementsByTagName("tbody")[0].innerHTML += html;
+      let html;
+      if (movie.rented) {
+        html = `<tr id="${index}"><td>${movie.name}</td><td>${movie.dateMade}</td><td><span class="text-danger">Rented </span></td></tr>`;
+      } else {
+        html = `<tr id="${index}"><td>${movie.name}</td><td>${movie.dateMade}</td><td><button class="btn btn--rent" onclick="rent(${index})">Rent</button></td></tr>`;
+      }
+
+      html_table.innerHTML += html;
     });
   },
 
   //Rent a movie
   rent_movie(index) {
-    row = html_table
-      .getElementsByTagName("tr")
-      [index + 1].classList.add("d-none");
+    this.movies[index].rented = true;
+    this.clear_current_table();
+    return this.display_movies(this.movies);
   },
 
   //Search the movie array
@@ -46,15 +57,31 @@ const movieLibrary = {
       return movie.name.toLowerCase().includes(query.toLowerCase());
     });
 
-    html_table.getElementsByTagName("tbody")[0].innerHTML = "";
+    this.clear_current_table();
     return this.display_movies(search_result);
   },
 
   //restore rented movies
   restore_rented_movies() {
-    const hidden_elements = html_table.querySelectorAll(".d-none");
-    hidden_elements.forEach((element) => {
-      element.classList.remove("d-none");
+    this.movies.map((movie) => {
+      if (movie.rented) {
+        movie.rented = false;
+      }
+    });
+    this.clear_current_table();
+    return this.display_movies(this.movies);
+  },
+
+  //Clear current table
+  clear_current_table() {
+    if (html_table.children.length <= 0) {
+      return;
+    }
+    const children = Array.from(html_table.children);
+    children.forEach((element, index) => {
+      if (index > 0) {
+        return element.remove();
+      }
     });
   },
 };
